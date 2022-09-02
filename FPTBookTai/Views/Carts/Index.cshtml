@@ -1,0 +1,91 @@
+﻿@model IEnumerable<FPTBook.Models.Cart>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Your Cart</h1>
+
+@if (Model.Count() > 0)
+{
+    int stt = 1;
+    double total = 0;
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>
+                    #
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Book.Title)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Book.Price)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Quantity)
+                </th>
+                <th>
+                    Total Item
+                </th>
+                   <th>
+                    Actions
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                double price = item.Book.Price * item.Quantity;
+                total = total + price;
+                <tr>
+                    <td>
+                        @(stt++)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Book.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Book.Price)
+                    </td>
+                    <td>
+                        <a asp-action="Minus" asp-route-isbn="@item.BookIsbn" class="btn btn-primary"> <i class="fas fa-minus-circle"></i></a>
+                        @Html.DisplayFor(modelItem => item.Quantity)
+                        <a asp-action="Plus" asp-route-isbn="@item.BookIsbn" class="btn btn-primary"><i class="fas fa-plus-circle"></i></a>
+                       
+                    </td>
+                    <td>
+                        @(Math.Round((item.Quantity) * (item.Book.Price),1))
+                    </td>
+                    <td>
+                        <a asp-action="Remove" asp-route-isbn="@item.BookIsbn" class="btn btn-danger">Remove <i class="fas fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>Total: @(Math.Round(total,1))</td>
+            </tr>
+        </tbody>
+    </table>
+    <a asp-controller="Books" class="btn button-violet " asp-action="Checkout"> Checkout <i class="fas fa-check-circle"></i></a>
+}
+else
+{
+    <p class="alert alert-danger">Cart is Empty</p>
+}
+ <a asp-controller="Books" class="btn button-violet" asp-action="List">Continue Shopping</a>
+
+    <a asp-controller="Orders" class="btn button-violet" asp-action="Index">Order History</a>
+     
+<style>
+    .button-violet{
+        color: #fff;
+    background-color: #6b38b6;
+    border-color: #6b38b6;
+    }
+</style>

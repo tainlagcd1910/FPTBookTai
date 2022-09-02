@@ -1,0 +1,25 @@
+﻿@using FPTBook.Areas.Identity.Data
+@using Microsoft.AspNetCore.Identity
+@model IEnumerable<FPTBookUser>
+
+<h1>All Users</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">UId</th>
+            <th scope="col">User Email</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <th scope="row">@item.Id</th>
+                <td>@item.Email</td>
+                <td><a asp-action="ChangePassword" asp-controller="Admin">Change Password</a></td>
+            </tr>
+        }
+    </tbody>
+</table>

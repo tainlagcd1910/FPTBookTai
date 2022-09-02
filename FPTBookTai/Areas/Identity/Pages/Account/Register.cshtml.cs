@@ -34,7 +34,9 @@ namespace FPTBook.Areas.Identity.Pages.Account
         public List<SelectListItem> Roles { get; } = new List<SelectListItem>
       {
           new SelectListItem { Value = "Customer", Text = "Customer" },
-          new SelectListItem { Value = "Seller", Text = "Store Owner" }
+          new SelectListItem { Value = "Seller", Text = "Store Owner" },
+          new SelectListItem { Value = "Admin", Text = "Admin" }
+
       };
         public RegisterModel(
             UserManager<FPTBookUser> userManager,

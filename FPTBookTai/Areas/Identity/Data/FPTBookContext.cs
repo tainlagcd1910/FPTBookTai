@@ -17,6 +17,7 @@ public class FPTBookContext : IdentityDbContext<FPTBookUser>
     public DbSet<Order> Order { get; set; }
     public DbSet<OrderDetail> OrderDetail { get; set; }
     public DbSet<Cart> Cart { get; set; }
+    public DbSet<Category> Categories { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -29,6 +30,11 @@ public class FPTBookContext : IdentityDbContext<FPTBookUser>
             .HasOne<Store>(b => b.Store)
             .WithMany(st => st.Books)
             .HasForeignKey(b => b.StoreId);
+
+        builder.Entity<Book>()
+            .HasOne<Category>(b => b.Category)
+            .WithMany(c => c.Books)
+            .HasForeignKey(b => b.CategoryId);
 
         builder.Entity<Order>()
             .HasOne<FPTBookUser>(o => o.User)

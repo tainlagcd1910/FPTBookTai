@@ -36,15 +36,27 @@ namespace FPTBook.Controllers
         //    var userContext = _context.Book.Include(b => b.Store);
         //    return View(await userContext.ToListAsync());
         //}
-       [AllowAnonymous]
+        [AllowAnonymous]
         public async Task<IActionResult> List(int id, string searchString)
         {
             var books1 = from b in _context.Book
-                         select b;
+                         join c in _context.Categories on b.CategoryId equals c.Id
+                         select new Book
+                         {
+                             Isbn = b.Isbn,
+                             Title = b.Title,
+                             Pages = b.Pages,
+                             Author = b.Author,
+                             CategoryName = c.Description,
+                             Price = b.Price,
+                             Desc = b.Desc,
+                             ImgUrl = b.ImgUrl,
+                             StoreId = b.StoreId
+                         };
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                books1 = books1.Where(s => s.Title!.Contains(searchString) || s.Category.Contains(searchString));
+                books1 = books1.Where(s => s.Title!.Contains(searchString) || s.CategoryName.Contains(searchString));
             }
             int numberOfRecords = await books1.CountAsync();     //Count SQL
             int numberOfPages = (int)Math.Ceiling((double)numberOfRecords / _recordsPerPages);
@@ -106,7 +118,7 @@ namespace FPTBook.Controllers
                     _context.Add(myOrder);
                     await _context.SaveChangesAsync();
                     //Step 2: insert all order details by var "myDetailsInCart"
-                    
+
                     foreach (var item in myDetailsInCart)
                     {
                         OrderDetail detail = new OrderDetail()
@@ -140,7 +152,19 @@ namespace FPTBook.Controllers
             Store thisStore = await _context.Store.FirstOrDefaultAsync(s => s.UId == thisUser.Id);
             var userContext = _context.Book.Where(b => b.StoreId == thisStore.Id).Include(b => b.Store);
             var books1 = from b in userContext
-                         select b;
+                         join c in _context.Categories on b.CategoryId equals c.Id
+                         select new Book
+                         {
+                             Isbn = b.Isbn,
+                             Title = b.Title,
+                             Pages = b.Pages,
+                             Author = b.Author,
+                             CategoryName = c.Description,
+                             Price = b.Price,
+                             Desc = b.Desc,
+                             ImgUrl = b.ImgUrl,
+                             StoreId = b.StoreId
+                         };
             if (!String.IsNullOrEmpty(searchString))
             {
                 books1 = books1.Where(s => s.Title!.Contains(searchString));
@@ -164,9 +188,24 @@ namespace FPTBook.Controllers
                 return NotFound();
             }
 
-            var book = await _context.Book
-                .Include(b => b.Store)
-                .FirstOrDefaultAsync(m => m.Isbn == id);
+            var book = await (from b in _context.Book
+                              join c in _context.Categories on b.CategoryId equals c.Id
+                              select new Book
+                              {
+                                  Isbn = b.Isbn,
+                                  Title = b.Title,
+                                  Pages = b.Pages,
+                                  Author = b.Author,
+                                  CategoryName = c.Description,
+                                  Price = b.Price,
+                                  Desc = b.Desc,
+                                  ImgUrl = b.ImgUrl,
+                                  StoreId = b.StoreId,
+                                  Category = b.Category,
+                                  Store = b.Store
+                              })
+                            .FirstOrDefaultAsync(m => m.Isbn == id);
+
             if (book == null)
             {
                 return NotFound();
@@ -178,7 +217,7 @@ namespace FPTBook.Controllers
         // GET: Books/Create
         public IActionResult Create()
         {
-            ViewData["StoreId"] = new SelectList(_context.Store, "Id", "Id");
+            ViewData["Categories"] = new SelectList(_context.Categories, "Id", "Description");
             return View();
         }
 
@@ -188,7 +227,7 @@ namespace FPTBook.Controllers
         [Authorize(Roles = "Seller")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(IFormFile image, [Bind("Isbn,Title,Pages,Author,Category,Price,Desc,ImgUrl")] Book book)
+        public async Task<IActionResult> Create(IFormFile image, [Bind("Isbn,Title,Pages,Author,CategoryId,Price,Desc,ImgUrl")] Book book)
         {
             if (image != null)
             {
@@ -212,7 +251,7 @@ namespace FPTBook.Controllers
             _context.Add(book);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-            ViewData["StoreId"] = new SelectList(_context.Store, "Id", "Id", book.StoreId);
+            ViewData["Categories"] = new SelectList(_context.Categories, "Id", "Description", book.CategoryId);
             return View(book);
         }
         [Authorize(Roles = "Seller")]
@@ -229,7 +268,7 @@ namespace FPTBook.Controllers
             {
                 return NotFound();
             }
-            ViewData["StoreId"] = new SelectList(_context.Store, "Id", "Id", book.StoreId);
+            ViewData["Categories"] = new SelectList(_context.Categories, "Id", "Description", book.CategoryId);
             return View(book);
         }
 
@@ -239,40 +278,38 @@ namespace FPTBook.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Seller")]
-        public async Task<IActionResult> Edit(string id, [Bind("Isbn,Title,Pages,Author,Category,Price,Desc,ImgUrl")] Book book)
+        public async Task<IActionResult> Edit(string id, [Bind("Isbn,Title,Pages,Author,CategoryId,Price,Desc,ImgUrl")] Book book)
         {
             if (id != book.Isbn)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            var bookToUpdate = await _context.Book.FirstOrDefaultAsync(s => s.Isbn == id);
+            if (bookToUpdate == null)
             {
-                var bookToUpdate = await _context.Book.FirstOrDefaultAsync(s => s.Isbn == id);
-                if (bookToUpdate == null)
-                {
-                    return NotFound();
-                }
-                bookToUpdate.Title = book.Title;
-                bookToUpdate.Pages = book.Pages;
-                bookToUpdate.Category = book.Category;
-                bookToUpdate.Author = book.Author;
-                bookToUpdate.Pages = book.Pages;
-                bookToUpdate.Price = book.Price;
-                bookToUpdate.Desc = book.Desc;
-                try
-                {
-                    _context.Update(bookToUpdate);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException ex)
-                {
-                    ModelState.AddModelError("", "Unable to update the change. Error is: " + ex.Message);
-                }
-                return RedirectToAction(nameof(Index));
+                return NotFound();
             }
-            ViewData["StoreId"] = new SelectList(_context.Store, "Id", "Id", book.StoreId);
-            return View(book);
+
+            bookToUpdate.Title = book.Title;
+            bookToUpdate.Pages = book.Pages;
+            bookToUpdate.CategoryId = book.CategoryId;
+            bookToUpdate.Author = book.Author;
+            bookToUpdate.Pages = book.Pages;
+            bookToUpdate.Price = book.Price;
+            bookToUpdate.Desc = book.Desc;
+
+            try
+            {
+                _context.Update(bookToUpdate);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                ModelState.AddModelError("", "Unable to update the change. Error is: " + ex.Message);
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Books/Delete/5

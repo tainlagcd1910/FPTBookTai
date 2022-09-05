@@ -1,6 +1,7 @@
-﻿using FPTBook.Models;
-using FPTBook.Data;
+﻿
 using FPTBook.Models;
+using FPTBook.Data;
+
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,12 +12,13 @@ using System.Threading.Tasks;
 
 namespace FPTBook.Controllers
 {
-    [Authorize(Roles = "Seller")]
-    public class CategoriesController : Controller
+    [Authorize(Roles = "Admin")]
+ 
+    public class CategoriesAdminController : Controller
     {
         private readonly FPTBookContext _context;
 
-        public CategoriesController(FPTBookContext context)
+        public CategoriesAdminController(FPTBookContext context)
         {
             _context = context;
         }
@@ -24,7 +26,7 @@ namespace FPTBook.Controllers
         // GET: Categories
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Categories.ToListAsync());
+            return View(await _context.CategoriesAdmin.ToListAsync());
         }
 
         // GET: Categories/Details/5
@@ -35,7 +37,7 @@ namespace FPTBook.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories
+            var category = await _context.CategoriesAdmin
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (category == null)
             {
@@ -74,7 +76,7 @@ namespace FPTBook.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _context.CategoriesAdmin.FindAsync(id);
             if (category == null)
             {
                 return NotFound();
@@ -123,7 +125,7 @@ namespace FPTBook.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories
+            var category = await _context.CategoriesAdmin
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (category == null)
             {
@@ -144,9 +146,52 @@ namespace FPTBook.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        public async Task<IActionResult> ChangeActiveCategory(int id)
+        {
+            var category = await _context.CategoriesAdmin.FindAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            category.Active = true;
+            try
+            {
+                _context.Update(category);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                ModelState.AddModelError("", "Unable to update the change. Error is: " + ex.Message);
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> ChangeActiveCategory1(int id)
+        {
+            var category = await _context.CategoriesAdmin.FindAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            category.Active = false;
+            try
+            {
+                _context.Update(category);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                ModelState.AddModelError("", "Unable to update the change. Error is: " + ex.Message);
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+       
         private bool CategoryExists(int id)
         {
-            return _context.Categories.Any(e => e.Id == id);
+            return _context.CategoriesAdmin.Any(e => e.Id == id);
         }
+
+
     }
 }

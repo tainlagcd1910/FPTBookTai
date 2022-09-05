@@ -217,7 +217,7 @@ namespace FPTBook.Controllers
         // GET: Books/Create
         public IActionResult Create()
         {
-            ViewData["Categories"] = new SelectList(_context.Categories, "Id", "Description");
+            ViewData["Categories"] = new SelectList(_context.Categories.Where(c => c.Active == true), "Id", "Description");
             return View();
         }
 
@@ -251,8 +251,6 @@ namespace FPTBook.Controllers
             _context.Add(book);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-            ViewData["Categories"] = new SelectList(_context.Categories, "Id", "Description", book.CategoryId);
-            return View(book);
         }
         [Authorize(Roles = "Seller")]
         // GET: Books/Edit/5
@@ -268,7 +266,7 @@ namespace FPTBook.Controllers
             {
                 return NotFound();
             }
-            ViewData["Categories"] = new SelectList(_context.Categories, "Id", "Description", book.CategoryId);
+            ViewData["Categories"] = new SelectList(_context.Categories.Where(c => c.Active == true), "Id", "Description", book.CategoryId);
             return View(book);
         }
 

@@ -18,6 +18,7 @@ public class FPTBookContext : IdentityDbContext<FPTBookUser>
     public DbSet<OrderDetail> OrderDetail { get; set; }
     public DbSet<Cart> Cart { get; set; }
     public DbSet<Category> Categories { get; set; }
+    public DbSet<Category> CategoriesAdmin { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

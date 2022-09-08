@@ -18,7 +18,7 @@
             <tr>
                 <th scope="row">@item.Id</th>
                 <td>@item.Email</td>
-                <td><a asp-action="ChangePassword" asp-controller="Admin">Change Password</a></td>
+                <td><a asp-action="ResetPassword" asp-controller="Admin" asp-route-id=@item.Id>Change Password</a></td>
             </tr>
         }
     </tbody>

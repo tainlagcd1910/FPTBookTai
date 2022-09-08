@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace FPTBook.Controllers
 {
     [Authorize(Roles = "Admin")]
- 
+
     public class CategoriesAdminController : Controller
     {
         private readonly FPTBookContext _context;

@@ -33,8 +33,11 @@
                     @Html.DisplayFor(modelItem => item.Active)
                 </td>
                 <td>
-                    <a asp-controller="CategoriesAdmin" asp-action="ChangeActiveCategory" asp-route-id="@item.Id">Active</a>
-                    <a asp-controller="CategoriesAdmin" asp-action="ChangeActiveCategory1" asp-route-id="@item.Id">Refuse</a>
+                    <a asp-controller="CategoriesAdmin" asp-action="ChangeActiveCategory" asp-route-id="@item.Id" 
+                    class="btn btn-info">Active</a>
+                    <a asp-controller="CategoriesAdmin" asp-action="ChangeActiveCategory1" asp-route-id="@item.Id"
+                   class="btn btn-info">Refuse</a>
+                    <a asp-controller="CategoriesAdmin" asp-action="Delete" asp-route-id=@item.Id class="btn btn-info">Delete</a>
                 </td>
             </tr>
         }
